@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación Sumativa - CTP de Santa Bárbara</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --card-bg: #151b2b;
+            --accent-cyan: #00f3ff;
+            --accent-green: #00ff88;
+            --accent-red: #ff3366;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border-color: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2, h3, .cyber-font {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            z-index: 1000;
+        }
+
+        .top-bar-brand {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            color: var(--accent-cyan);
+            font-weight: 700;
+        }
+
+        .top-bar-stats {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .timer-badge {
+            background: rgba(255, 51, 102, 0.1);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+        }
+
+        .progress-container {
+            width: 150px;
+            background: var(--bg-main);
+            border-radius: 4px;
+            height: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent-green);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Container & Screens */
+        .main-container {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+            flex: 1;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Login Screen */
+        .login-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2.5rem;
+            max-width: 450px;
+            margin: 4rem auto;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        .login-card h2 {
+            color: var(--accent-cyan);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--accent-cyan);
+            color: var(--bg-main);
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-danger {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        .error-msg {
+            color: var(--accent-red);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        /* Exam Header REA */
+        .exam-header {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .exam-header h3 {
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .meta-grid span {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        /* Question Cards */
+        .question-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .option-label:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .option-label input {
+            accent-color: var(--accent-cyan);
+        }
+
+        /* Matching Section (Part II) */
+        .matching-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .matching-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .match-node {
+            padding: 1rem;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .match-node.selected {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 243, 255, 0.05);
+        }
+
+        .match-node.matched {
+            border-color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        /* Short Answer & Ordering */
+        .text-input-short {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+        }
+
+        .order-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        .order-btns button {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-left: 0.25rem;
+        }
+
+        .order-btns button:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        /* Navigation Modal & Floating Grid */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .grid-matrix {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .grid-item {
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .grid-item.answered {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .grid-item.pending {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        @media print {
+            .top-bar, .btn, .modal-overlay { display: none !important; }
+            body { background: white; color: black; }
+            .main-container { margin: 0; padding: 0; max-width: 100%; }
+            .question-card, .exam-header { border: 1px solid #ccc; background: white; color: black; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar" id="topBar" style="display: none;">
+        <div class="top-bar-brand">CTP Santa Bárbara | Redes y POO</div>
+        <div class="top-bar-stats">
+            <div class="timer-badge" id="timerDisplay">80:00</div>
+            <div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Progreso</div>
+                <div class="progress-container">
+                    <div class="progress-bar-fill" id="progressBarFill"></div>
+                </div>
+            </div>
+            <button class="btn" style="padding: 0.4rem 1rem; width: auto;" onclick="openNavModal()">Panel / Finalizar</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+
+        <!-- Login Screen -->
+        <div id="loginScreen" class="screen active">
+            <div class="login-card">
+                <h2>Acceso Evaluativo</h2>
+                <div class="form-group">
+                    <label>Correo Electrónico Institucional</label>
+                    <input type="email" id="loginEmail" placeholder="estudiante@cpt.go.cr">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••">
+                </div>
+                <button class="btn" onclick="handleLogin()">Ingresar a la Prueba</button>
+                <div id="loginError" class="error-msg"></div>
+            </div>
+        </div>
+
+        <!-- Exam Screen -->
+        <div id="examScreen" class="screen">
+            <div class="exam-header">
+                <h3 id="studentHeaderTitle">Instrumento de Evaluación Sumativa</h3>
+                <div class="meta-grid">
+                    <div>Institución: <span>CTP de Santa Bárbara</span></div>
+                    <div>Subárea: <span>Configuración y Soporte a Redes</span></div>
+                    <div>Estudiante: <span id="lblStudentName">-</span></div>
+                    <div>Intento: <span id="lblAttempt">-</span></div>
+                    <div>Puntos Totales: <span>35 Puntos (25%)</span></div>
+                    <div>Tiempo Límite: <span>80 Minutos</span></div>
+                </div>
+            </div>
+
+            <div id="questionsContainer"></div>
+
+            <div style="text-align: center; margin: 3rem 0;">
+                <button class="btn" style="max-width: 300px; padding: 1rem;" onclick="submitExam()">Finalizar y Entregar Prueba</button>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="screen">
+            <div class="exam-header" style="text-align: center;">
+                <h2>Resultado de la Evaluación Sumativa</h2>
+                <p style="color: var(--text-muted); margin-top: 0.5rem;">Prueba procesada y registrada oficialmente en el sistema.</p>
+            </div>
+            <div class="question-card" style="text-align: center;">
+                <h3 id="resPoints" style="font-size: 2rem; color: var(--accent-cyan); margin-bottom: 0.5rem;">0 / 35 Puntos</h3>
+                <p id="resGrade" style="font-size: 1.2rem; margin-bottom: 0.5rem;">Nota Base 100: 0</p>
+                <p id="resPercentage" style="font-size: 1.1rem; color: var(--accent-green); margin-bottom: 1.5rem;">Porcentaje Obtenido: 0% / 25%</p>
+                <button class="btn" style="max-width: 250px; display: inline-block;" onclick="window.print()">Descargar Comprobante / Guardar PDF</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Navigation & Status Modal -->
+    <div class="modal-overlay" id="navModal">
+        <div class="modal-content">
+            <h3 style="color: var(--accent-cyan); margin-bottom: 0.5rem;">Estado de Preguntas (35 Ítems)</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Verde: Respondida | Rojo: Pendiente. Haga clic para ir al ítem.</p>
+            <div class="grid-matrix" id="modalGridMatrix"></div>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button class="btn" onclick="closeNavModal()">Continuar Prueba</button>
+                <button class="btn btn-danger" onclick="submitExam()">Entregar Definitivamente</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const officialUsers = [
+            { email: "cascante535@gmail.com", pass: "Casa1234", name: "Cascante 535" },
+            { email: "valeriahernandezcascante@gmail.com", pass: "Casa1234", name: "Valeria Hernández Cascante" },
+            { email: "jerichacolomer@gmail.com", pass: "Casa1234", name: "Jericha Colomer" },
+            { email: "rousvillalobos0@gmail.com", pass: "Casa1234", name: "Rous Villalobos" },
+            { email: "rey200578@gmail.com", pass: "Casa1234", name: "Rey 200578" },
+            { email: "justinbonillaaguirre054@gmail.com", pass: "Casa1234", name: "Justin Bonilla Aguirre" },
+            { email: "arrietamaikol856@gmail.com", pass: "Casa1234", name: "Maikol Arrieta" },
+            { email: "soportecpt2025@gmail.com", pass: "Casa2781", name: "Soporte CPT" }
+        ];
+
+        const SCRIPT_URL = "AQUÍ_DEBE_PEGAR_LA_URL_DE_GOOGLE_APPS_SCRIPT";
+        let currentUser = null;
+        let currentAttempt = 1;
+        let timerInterval = null;
+        let timeLeft = 80 * 60;
+
+        const examData = {
+            part1: [
+                { id: 1, q: "Según el texto, ¿qué paradigma de programación utiliza 'objetos' para diseñar aplicaciones y programas informáticos?", opts: ["Programación Estructurada", "Programación Orientada a Objetos (POO)", "Programación Lineal Global"], ans: 1 },
+                { id: 2, q: "¿Cuáles son las técnicas bien establecidas en las que se basa la Programación Orientada a Objetos?", opts: ["Abstracción, encapsulamiento, herencia y polimorfismo", "Enrutamiento, conmutación, VLAN y QoS", "Compilación, enlace estático y punteros de memoria"], ans: 0 },
+                { id: 3, q: "En el contexto de CTP con énfasis en Configuración y Soporte a Redes, dominar la POO mediante lenguajes interpretados como Python permite:", opts: ["Fabricar componentes físicos de silicio", "Automatizar tareas repetitivas y modelar dispositivos de red", "Reemplazar totalmente los sistemas operativos de servidores"], ans: 1 },
+                { id: 4, q: "¿Cómo se organizan los datos y operaciones en la Programación Orientada a Objetos frente a la estructurada tradicional?", opts: ["En funciones lineales globales", "En estructuras lógicas autocontenidas denominadas clases", "En tablas relacionales de bases de datos SQL"], ans: 1 },
+                { id: 5, q: "¿Qué es un Entorno de Desarrollo Integrado (IDE) según la definición técnica aportada?", opts: ["Un protocolo de capa de red para enrutamiento dinámico", "Una aplicación de software que proporciona facilidades integradas para el desarrollo", "Un dispositivo perimetral de seguridad basado en hardware"], ans: 1 },
+                { id: 6, q: "¿Cuáles herramientas son comúnmente utilizadas por técnicos en redes para trabajar con lenguajes interpretados como Python?", opts: ["Visual Studio Code, PyCharm o Jupyter Notebooks", "Cisco Packet Tracer y Wireshark", "PuTTY y WinSCP exclusivamente"], ans: 0 },
+                { id: 7, q: "En un IDE, ¿cuál componente se encarga de la inspección paso a paso del estado de los objetos y variables en memoria?", opts: ["Editor de Código Fuente", "Terminal / Consola", "Depurador (Debugger)"], ans: 2 },
+                { id: 8, q: "¿Qué es una clase en Python según el material de estudio técnico?", opts: ["Una instancia en ejecución dentro de la memoria RAM", "Una plantilla o molde abstracto que define de manera genérica los objetos", "Un archivo binario compilado para microcontroladores"], ans: 1 },
+                { id: 9, q: "Para definir una clase en Python, ¿qué palabra reservada se emplea seguida del nombre en PascalCase?", opts: ["def", "class", "object"], ans: 1 },
+                { id: 10, q: "En la clase DispositivoRed del texto, ¿cómo se llama el método especial que actúa como constructor para inicializar atributos?", opts: ["__init__", "__construct__", "__main__"], ans: 0 },
+                { id: 11, q: "¿Cómo se le conoce al proceso de construir entidades concretas en la memoria RAM a partir de una clase?", opts: ["Compilación", "Instanciación o creación de objetos", "Serialización"], ans: 1 },
+                { id: 12, q: "¿Dónde se definen generalmente las variables de instancia para que pertenezcan exclusivamente a un objeto particular?", opts: ["Fuera de cualquier método en el cuerpo principal", "Dentro del constructor __init__ utilizando el prefijo self.", "Como variables globales del script"], ans: 1 },
+                { id: 13, q: "¿Cómo se definen las variables de clase que son compartidas por todas las instancias?", opts: ["Directamente en el cuerpo de la clase, fuera de cualquier método", "Utilizando obligatoriamente el decorador @classmethod", "Dentro del método __init__ con el prefijo cls."], ans: 0 },
+                { id: 14, q: "En Python, ¿qué parámetro requieren obligatoriamente los métodos de instancia ordinarios como primer identificador?", opts: ["cls", "self", "this"], ans: 1 },
+                { id: 15, q: "¿Qué decorador se utiliza para definir métodos de clase puros que reciben cls como primer parámetro?", opts: ["@staticmethod", "@classmethod", "@property"], ans: 1 },
+                { id: 16, q: "Según el módulo de redes, ¿cuál ha sido la evolución de las topologías locales tradicionales en la infraestructura moderna?", opts: ["Hacia arquitecturas altamente dinámicas, virtualizadas y definidas por software (SDN)", "Hacia cableados coaxiales con dominios de colisión extensos", "Hacia sistemas totalmente analógicos sin enrutamiento"], ans: 0 },
+                { id: 17, q: "¿Qué tecnología inalámbrica reduce la latencia de escaneo de inventario de 450ms a menos de 25ms en el ejemplo práctico real?", opts: ["Wi-Fi 6", "Bluetooth 4.0", "Infrarrojo corporativo"], ans: 0 },
+                { id: 18, q: "¿Qué protocolo o mecanismo asegura que las videoconferencias o transacciones financieras no se afecten por descargas masivas?", opts: ["QoS (Quality of Service)", "DHCP automático", "SMB compartido"], ans: 0 },
+                { id: 19, q: "¿Qué dispositivo de seguridad perimetral realiza inspección profunda de paquetes (DPI) y entiende de aplicaciones específicas?", opts: ["Switch gestionable de Capa 2", "Router perimetral tradicional", "Cortafuegos de próxima generación (NGFW)"], ans: 2 },
+                { id: 20, q: "En el diagnóstico de redes, ¿qué comando verifica la conectividad de capa de red (ICMP) y mide la latencia?", opts: ["nslookup", "ping", "ipconfig"], ans: 1 }
+            ],
+            part2: [
+                { premise: "Editor de Código Fuente", def: "Área de escritura con resaltado de sintaxis orientada a objetos." },
+                { premise: "Clase", def: "Plantilla o molde abstracto que define de manera genérica los objetos." },
+                { premise: "Variables de Instancia", def: "Atributos particulares definidos con self. dentro del constructor." },
+                { premise: "Switch Gestionable", def: "Dispositivo de Capa 2 que realiza segmentación mediante VLANs." },
+                { premise: "Firewall NGFW", def: "Dispositivo de Capas 3 a 7 para inspección profunda y control de aplicaciones." }
+            ],
+            part2Options: [
+                "Área de escritura con resaltado de sintaxis orientada a objetos.",
+                "Plantilla o molde abstracto que define de manera genérica los objetos.",
+                "Atributos particulares definidos con self. dentro del constructor.",
+                "Dispositivo de Capa 2 que realiza segmentación mediante VLANs.",
+                "Dispositivo de Capas 3 a 7 para inspección profunda y control de aplicaciones.",
+                "Servicio de asignación dinámica de direcciones IP en la red local. [Distractor]"
+            ],
+            part3: [
+                { id: 26, q: "Escriba la palabra reservada en Python utilizada para definir o declarar una nueva clase:", expected: "class" },
+                { id: 27, q: "Escriba el nombre del método especial que actúa como constructor de clase en Python (__init__):", expected: "__init__" },
+                { id: 28, q: "Escriba el identificador obligatorio utilizado en los métodos de instancia para referenciarse a sí mismo:", expected: "self" },
+                { id: 29, q: "Escriba el comando fundamental de red utilizado para verificar la conectividad ICMP y la latencia:", expected: "ping" },
+                { id: 30, q: "Escriba el acrónimo del protocolo o servicio encargado de la distribución automatizada de parámetros IP:", expected: "DHCP" }
+            ],
+            part4: [
+                "1. Definir la clase principal utilizando la palabra reservada class y notación PascalCase.",
+                "2. Implementar el método constructor __init__ para inicializar los atributos con self.",
+                "3. Escribir los métodos de instancia y de clase (@classmethod) según los requerimientos.",
+                "4. Instanciar objetos concretos en la memoria RAM asignándoles valores particulares.",
+                "5. Invocar métodos y verificar el funcionamiento de las instancias creadas."
+            ]
+        };
+
+        function normalizeText(text) {
+            return text.trim().toLowerCase()
+                       .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                       .replace(/\s+/g, " ");
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPassword').value.trim();
+            const errDiv = document.getElementById('loginError');
+
+            const student = officialUsers.find(u => u.email === email && u.pass === pass);
+            if (!student) {
+                errDiv.textContent = "Credenciales incorrectas o correo no autorizado.";
+                return;
+            }
+
+            let attempts = JSON.parse(localStorage.getItem('attempts_' + email) || '0');
+            if (attempts >= 2) {
+                errDiv.textContent = "Acceso bloqueado: Ha agotado el límite máximo de 2 intentos permitidos.";
+                return;
+            }
+
+            currentUser = student;
+            currentAttempt = attempts + 1;
+            localStorage.setItem('attempts_' + email, currentAttempt);
+
+            document.getElementById('loginScreen').classList.remove('active');
+            document.getElementById('topBar').style.display = 'flex';
+            document.getElementById('examScreen').classList.add('active');
+
+            document.getElementById('lblStudentName').textContent = currentUser.name;
+            document.getElementById('lblAttempt').textContent = `${currentAttempt} de 2`;
+
+            renderExam();
+            startTimer();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("El tiempo límite ha expirado. La prueba se enviará automáticamente.");
+                    submitExam();
+                    return;
+                }
+                timeLeft--;
+                let m = Math.floor(timeLeft / 60);
+                let s = timeLeft % 60;
+                document.getElementById('timerDisplay').textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+                
+                let progressPercent = ((80 * 60 - timeLeft) / (80 * 60)) * 100;
+                document.getElementById('progressBarFill').style.width = progressPercent + '%';
+            }, 1000);
+        }
+
+        function renderExam() {
+            let html = '';
+
+            html += `<div class="question-card"><h3>I PARTE: SELECCIÓN ÚNICA (20 Puntos)</h3></div>`;
+            examData.part1.forEach((item, idx) => {
+                html += `
+                    <div class="question-card">
+                        <div class="question-title">${idx + 1}. ${item.q}</div>
+                        <div class="options-group">
+                            ${item.opts.map((opt, oIdx) => `
+                                <label class="option-label">
+                                    <input type="radio" name="p1_${item.id}" value="${oIdx}" onchange="updateProgress()">
+                                    <span>${String.fromCharCode(65 + oIdx)}.${opt}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `<div class="question-card"><h3>II PARTE: CORRESPONDENCIA / ASOCIACIÓN (5 Puntos)</h3><p style="color:var(--text-muted); font-size:0.9rem;">Haga clic en un concepto de la izquierda y luego en su definición correspondiente en la derecha.</p></div>`;
+            html += `
+                <div class="question-card">
+                    <div class="matching-container">
+                        <div class="matching-column" id="colA">
+                            <h4 style="color:var(--accent-cyan)">Columna A (Premisas)</h4>
+                            ${examData.part2.map((p, idx) => `<div class="match-node" onclick="selectPremise(${idx})" id="premise_${idx}">${p.premise}</div>`).join('')}
+                        </div>
+                        <div class="matching-column" id="colB">
+                            <h4 style="color:var(--accent-cyan)">Columna B (Definiciones)</h4>
+                            ${examData.part2Options.map((opt, idx) => `<div class="match-node" onclick="selectDefinition(${idx})" id="def_${idx}">${opt}</div>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            html += `<div class="question-card"><h3>III PARTE: RESPUESTA CORTA (5 Puntos)</h3></div>`;
+            examData.part3.forEach((item, idx) => {
+                html += `
+                    <div class="question-card">
+                        <div class="question-title">${idx + 21}. ${item.q}</div>
+                        <input type="text" class="text-input-short" id="p3_${item.id}" placeholder="Escriba su respuesta técnica..." oninput="updateProgress()">
+                    </div>
+                `;
+            });
+
+            html += `<div class="question-card"><h3>IV PARTE: ORDENAMIENTO DE PROCEDIMIENTO (5 Puntos)</h3><p style="color:var(--text-muted); font-size:0.9rem;">Utilice los botones para ordenar los pasos del procedimiento técnico en la secuencia correcta.</p></div>`;
+            html += `
+                <div class="question-card">
+                    <div class="order-list" id="orderListContainer">
+                        ${shuffledOrderSteps().map((step, idx) => `
+                            <div class="order-item">
+                                <span>${step}</span>
+                                <div class="order-btns">
+                                    <button onclick="moveStep(${idx}, -1)">▲</button>
+                                    <button onclick="moveStep(${idx}, 1)">▼</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('questionsContainer').innerHTML = html;
+        }
+
+        let selectedPremiseIdx = null;
+        let userMatches = {};
+
+        function selectPremise(idx) {
+            document.querySelectorAll('#colA .match-node').forEach(n => n.classList.remove('selected'));
+            document.getElementById(`premise_${idx}`).classList.add('selected');
+            selectedPremiseIdx = idx;
+        }
+
+        function selectDefinition(defIdx) {
+            if (selectedPremiseIdx === null) return;
+            userMatches[selectedPremiseIdx] = defIdx;
+            document.getElementById(`premise_${selectedPremiseIdx}`).classList.add('matched');
+            document.getElementById(`def_${defIdx}`).classList.add('matched');
+            selectedPremiseIdx = null;
+            document.querySelectorAll('#colA .match-node').forEach(n => n.classList.remove('selected'));
+            updateProgress();
+        }
+
+        let currentSteps = [];
+        function shuffledOrderSteps() {
+            currentSteps = [...examData.part4].sort(() => Math.random() - 0.5);
+            return currentSteps;
+        }
+
+        function moveStep(idx, direction) {
+            const newIdx = idx + direction;
+            if (newIdx < 0 || newIdx >= currentSteps.length) return;
+            const temp = currentSteps[idx];
+            currentSteps[idx] = currentSteps[newIdx];
+            currentSteps[newIdx] = temp;
+            
+            const container = document.getElementById('orderListContainer');
+            container.innerHTML = currentSteps.map((step, i) => `
+                <div class="order-item">
+                    <span>${step}</span>
+                    <div class="order-btns">
+                        <button onclick="moveStep(${i}, -1)">▲</button>
+                        <button onclick="moveStep(${i}, 1)">▼</button>
+                    </div>
+                </div>
+            `).join('');
+            updateProgress();
+        }
+
+        function updateProgress() {
+            let answeredCount = 0;
+            examData.part1.forEach(item => {
+                if (document.querySelector(`input[name="p1_${item.id}"]:checked`)) answeredCount++;
+            });
+            answeredCount += Object.keys(userMatches).length;
+            examData.part3.forEach(item => {
+                if (document.getElementById(`p3_${item.id}`).value.trim() !== '') answeredCount++;
+            });
+            if (currentSteps.length > 0) answeredCount += 5;
+
+            let percent = (answeredCount / 35) * 100;
+            document.getElementById('progressBarFill').style.width = Math.min(percent, 100) + '%';
+        }
+
+        function openNavModal() {
+            let matrixHtml = '';
+            for (let i = 1; i <= 35; i++) {
+                let answered = false;
+                if (i <= 20) answered = document.querySelector(`input[name="p1_${i}"]:checked`) !== null;
+                else if (i <= 25) answered = userMatches[i - 21] !== undefined;
+                else if (i <= 30) answered = document.getElementById(`p3_${i}`).value.trim() !== '';
+                else answered = true;
+
+                matrixHtml += `<div class="grid-item ${answered ? 'answered' : 'pending'}">${i}</div>`;
+            }
+            document.getElementById('modalGridMatrix').innerHTML = matrixHtml;
+            document.getElementById('navModal').style.display = 'flex';
+        }
+
+        function closeNavModal() {
+            document.getElementById('navModal').style.display = 'none';
+        }
+
+        function submitExam() {
+            closeNavModal();
+            clearInterval(timerInterval);
+
+            let score = 0;
+            examData.part1.forEach(item => {
+                const selected = document.querySelector(`input[name="p1_${item.id}"]:checked`);
+                if (selected && parseInt(selected.value) === item.ans) score++;
+            });
+
+            examData.part2.forEach((p, idx) => {
+                if (userMatches[idx] === idx) score++;
+            });
+
+            examData.part3.forEach(item => {
+                const val = document.getElementById(`p3_${item.id}`).value;
+                if (normalizeText(val) === normalizeText(item.expected)) score++;
+            });
+
+            let part4Correct = true;
+            currentSteps.forEach((step, idx) => {
+                if (step !== examData.part4[idx]) part4Correct = false;
+            });
+            if (part4Correct) score += 5;
+
+            let grade100 = (score / 35) * 100;
+            let percentageReal = (score / 35) * 25;
+
+            document.getElementById('examScreen').classList.remove('active');
+            document.getElementById('resultsScreen').classList.add('active');
+            document.getElementById('resPoints').textContent = `${score} / 35 Puntos`;
+            document.getElementById('resGrade').textContent = `Nota Base 100: ${grade100.toFixed(2)}`;
+            document.getElementById('resPercentage').textContent = `Porcentaje Obtenido: ${percentageReal.toFixed(2)}% / 25%`;
+
+            if (!SCRIPT_URL.includes("AQUÍ_DEBE_PEGAR")) {
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: currentUser.email,
+                        name: currentUser.name,
+                        attempt: currentAttempt,
+                        score: score,
+                        grade: grade100.toFixed(2),
+                        percentage: percentageReal.toFixed(2)
+                    })
+                }).catch(err => console.error("Error al sincronizar:", err));
+            }
+        }
+    </script>
+</body>
+</html>
